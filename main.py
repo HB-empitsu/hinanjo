@@ -115,9 +115,13 @@ df0, title, status, date = load_data()
 
 
 st.title(title)
+
+st.write("by [えんぴつ](%s)" % "https://www.code4imabari.org/")
+
 st.subheader(f"{date} {status}")
 
 st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
+
 
 lat, lng = 34.0663183, 132.997528
 
@@ -139,7 +143,7 @@ for _, row in df0.iterrows():
     folium.Marker(
         location=[row["緯度"], row["経度"]],
         popup=folium.Popup(
-            f'<p>{row["避難所名"]}<br>{row["避難人数"]}/{row["収容人数"]}</p><p><a href="{row["navi"]}" target="_blank">ここへ行く</p>',
+            f'<p>{row["避難所名"]}<br>{row["収容人数"]}/{row["避難人数"]}/{row["避難世帯数"]}</p><p><a href="{row["navi"]}" target="_blank">ここへ行く</p>',
             max_width=300,
         ),
         tooltip=row["避難所名"],
