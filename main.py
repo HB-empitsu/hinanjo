@@ -116,7 +116,7 @@ df0, title, status, date = load_data()
 
 st.title(title)
 
-st.write("by [えんぴつ](%s)" % "https://www.code4imabari.org/")
+st.write("えんぴつ by [Code for Imabari](%s)" % "https://www.code4imabari.org/")
 
 st.subheader(f"{date} {status}")
 
