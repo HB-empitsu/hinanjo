@@ -154,7 +154,7 @@ for _, row in df0.iterrows():
 folium.plugins.LocateControl().add_to(m)
 
 # マップをストリームリットに表示
-st_data = st_folium(m, height=500)
+st_data = st_folium(m, height=300)
 
 # マップ境界内のデータフィルタリングと距離計算
 if st_data:
