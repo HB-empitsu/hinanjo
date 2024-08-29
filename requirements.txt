@@ -3,3 +3,5 @@ pandas
 pyproj
 streamlit
 streamlit-folium
+requests
+beautifulsoup4
