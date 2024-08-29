@@ -104,6 +104,10 @@ def load_data():
     df["避難世帯数"] = pd.to_numeric(df["避難世帯数"], errors="coerce").fillna(0).astype(int)
     df["避難人数"] = pd.to_numeric(df["避難人数"], errors="coerce").fillna(0).astype(int)
 
+    df["navi"] = df.apply(
+        lambda x: f'https://www.google.com/maps/dir/?api=1&destination={x["緯度"]},{x["経度"]}', axis=1
+    )
+
     return df, title, status, date
 
 
@@ -127,9 +131,15 @@ m = folium.Map(
 for _, row in df0.iterrows():
     color = set_color(row["避難人数"], row["収容人数"])
 
+    if row["開設状況"] != "開設":
+        color = "glay"
+
     folium.Marker(
         location=[row["緯度"], row["経度"]],
-        popup=folium.Popup(f'{row["避難所名"]}<br>{row["避難人数"]}/{row["収容人数"]}', max_width=300),
+        popup=folium.Popup(
+            f'<p>{row["避難所名"]}<br>{row["避難人数"]}/{row["収容人数"]}</p><p><a href="{row["navi"]}" target="_blank">ここへ行く</p>',
+            max_width=300,
+        ),
         tooltip=row["避難所名"],
         icon=folium.Icon(color=color),
     ).add_to(m)
@@ -138,7 +148,7 @@ for _, row in df0.iterrows():
 folium.plugins.LocateControl().add_to(m)
 
 # マップをストリームリットに表示
-st_data = st_folium(m, width=800, height=500)
+st_data = st_folium(m, height=500)
 
 # マップ境界内のデータフィルタリングと距離計算
 if st_data:
@@ -173,11 +183,11 @@ if st_data:
             [
                 "避難所名",
                 "開設状況",
-                "所在地",
-                "電話番号",
                 "収容人数",
                 "避難世帯数",
                 "避難人数",
+                "所在地",
+                "電話番号",
             ]
         ]
         .head(20)
