@@ -117,6 +117,8 @@ df0, title, status, date = load_data()
 st.title(title)
 st.subheader(date)
 
+st.write("えんぴつ by [Code for Imabari](%s)" % "https://www.code4imabari.org/")
+
 lat, lng = 34.0663183, 132.997528
 
 # フォリウムマップの初期化
@@ -132,7 +134,7 @@ for _, row in df0.iterrows():
     color = set_color(row["避難人数"], row["収容人数"])
 
     if row["開設状況"] != "開設":
-        color = "glay"
+        color = "gray"
 
     folium.Marker(
         location=[row["緯度"], row["経度"]],
