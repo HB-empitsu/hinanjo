@@ -39,7 +39,7 @@ st.set_page_config(
 )
 
 
-@st.cache_data
+@st.cache_data(ttl="5m")
 def load_data():
     url = "https://city-imabari.my.salesforce-sites.com/K_PUB_VF_HinanjyoList"
 
