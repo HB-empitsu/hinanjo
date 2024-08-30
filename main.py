@@ -119,14 +119,12 @@ df0, title, status, date, link, information = load_data()
 
 st.title(title)
 
-st.write("[避難所](%s)" % link)
+st.write("[避難所 詳細情報](%s)" % link)
 
 st.subheader(f"{date} {status}")
-
-st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
-
 st.write(f"{information}")
 
+st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
 
 lat, lng = 34.0663183, 132.997528
 
