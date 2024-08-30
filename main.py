@@ -108,15 +108,15 @@ def load_data():
         lambda x: f'https://www.google.com/maps/dir/?api=1&destination={x["緯度"]},{x["経度"]}', axis=1
     )
 
-    return df, title, status, date
+    return df, title, status, date, link
 
 
-df0, title, status, date = load_data()
+df0, title, status, date, link = load_data()
 
 
 st.title(title)
 
-st.write("えんぴつ by [Code for Imabari](%s)" % "https://www.code4imabari.org/")
+st.write("[避難所](%s)" % link")
 
 st.subheader(f"{date} {status}")
 
