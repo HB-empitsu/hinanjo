@@ -158,57 +158,57 @@ for _, row in df0.iterrows():
 # 現在値
 folium.plugins.LocateControl().add_to(m)
 
-with st.container():
-    # マップをストリームリットに表示
-    st_data = st_folium(m, height=300)
 
-    # マップ境界内のデータフィルタリングと距離計算
-    if st_data:
-        bounds = st_data["bounds"]
-        center = st_data.get("center", {"lat": lat, "lng": lng})
+# マップをストリームリットに表示
+st_data = st_folium(m, width=500, height=300)
 
-        southWest_lat = bounds["_southWest"]["lat"]
-        southWest_lng = bounds["_southWest"]["lng"]
-        northEast_lat = bounds["_northEast"]["lat"]
-        northEast_lng = bounds["_northEast"]["lng"]
+# マップ境界内のデータフィルタリングと距離計算
+if st_data:
+    bounds = st_data["bounds"]
+    center = st_data.get("center", {"lat": lat, "lng": lng})
 
-        # 境界内のポイントをフィルタリング
-        filtered_df = df0.loc[
-            (df0["緯度"] >= southWest_lat)
-            & (df0["緯度"] <= northEast_lat)
-            & (df0["経度"] >= southWest_lng)
-            & (df0["経度"] <= northEast_lng)
-        ].copy()
+    southWest_lat = bounds["_southWest"]["lat"]
+    southWest_lng = bounds["_southWest"]["lng"]
+    northEast_lat = bounds["_northEast"]["lat"]
+    northEast_lng = bounds["_northEast"]["lng"]
 
-        # 距離計算
-        grs80 = Geod(ellps="GRS80")
-        filtered_df["distance"] = filtered_df.apply(
-            lambda row: grs80.inv(center["lng"], center["lat"], row["経度"], row["緯度"])[2], axis=1
-        )
+    # 境界内のポイントをフィルタリング
+    filtered_df = df0.loc[
+        (df0["緯度"] >= southWest_lat)
+        & (df0["緯度"] <= northEast_lat)
+        & (df0["経度"] >= southWest_lng)
+        & (df0["経度"] <= northEast_lng)
+    ].copy()
 
-        # 距離でソート
-        filtered_df.sort_values("distance", inplace=True)
+    # 距離計算
+    grs80 = Geod(ellps="GRS80")
+    filtered_df["distance"] = filtered_df.apply(
+        lambda row: grs80.inv(center["lng"], center["lat"], row["経度"], row["緯度"])[2], axis=1
+    )
 
-        # 結果を表示
-        df1 = (
-            filtered_df[
-                [
-                    "避難所名",
-                    "開設状況",
-                    "収容人数",
-                    "避難人数",
-                    "避難世帯数",
-                    "所在地",
-                    "電話番号",
-                ]
+    # 距離でソート
+    filtered_df.sort_values("distance", inplace=True)
+
+    # 結果を表示
+    df1 = (
+        filtered_df[
+            [
+                "避難所名",
+                "開設状況",
+                "収容人数",
+                "避難人数",
+                "避難世帯数",
+                "所在地",
+                "電話番号",
             ]
-            .head(20)
-            .reset_index(drop=True)
-        )
-        st.dataframe(
-            df1,
-            column_config={
-                "distance": "直線距離",
-            },
-            hide_index=True,
-        )
+        ]
+        .head(20)
+        .reset_index(drop=True)
+    )
+    st.dataframe(
+        df1,
+        column_config={
+            "distance": "直線距離",
+        },
+        hide_index=True,
+    )
