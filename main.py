@@ -116,7 +116,7 @@ df0, title, status, date, link = load_data()
 
 st.title(title)
 
-st.write("[避難所](%s)" % link")
+st.write("[避難所](%s)" % link)
 
 st.subheader(f"{date} {status}")
 
