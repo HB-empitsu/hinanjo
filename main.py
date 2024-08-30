@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from urllib.parse import urljoin
 
 import pandas as pd
@@ -35,7 +36,7 @@ def set_color(value, max_value):
 
 
 st.set_page_config(
-    page_title="今治市 避難所情報", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None
+    page_title="今治市 避難所情報", page_icon=None, layout="centered", initial_sidebar_state="auto", menu_items=None
 )
 
 
@@ -59,7 +60,11 @@ def load_data():
     soup = fetch_soup(link)
 
     temp = soup.find(string=re.compile(r"^補足情報"))
-    information = temp.parent.get_text(strip=True) if temp else ""
+
+    information = ""
+
+    if temp:
+        information = unicodedata.normalize("NFKC", temp.parent.get_text(strip=True)).replace("。", "。  \n").strip()
 
     data = []
 
