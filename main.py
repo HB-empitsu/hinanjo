@@ -43,8 +43,8 @@ st.set_page_config(
 def load_data():
     url = "https://city-imabari.my.salesforce-sites.com/K_PUB_VF_HinanjyoList"
 
-    soup = fetch_soup(url)
-    tag = soup.select_one("div.volunteer > dl")
+    soup_list = fetch_soup(url)
+    tag = soup_list.select_one("div.volunteer > dl")
 
     href = tag.select_one("a").get("href")
     link = urljoin(url, href)
@@ -57,6 +57,9 @@ def load_data():
     status = "".join(dt.split())
 
     soup = fetch_soup(link)
+
+    temp = soup.find(string=re.compile(r"^補足情報"))
+    information = temp.parent.get_text(strip=True) if temp else ""
 
     data = []
 
@@ -108,10 +111,10 @@ def load_data():
         lambda x: f'https://www.google.com/maps/dir/?api=1&destination={x["緯度"]},{x["経度"]}', axis=1
     )
 
-    return df, title, status, date, link
+    return df, title, status, date, link, information
 
 
-df0, title, status, date, link = load_data()
+df0, title, status, date, link, information = load_data()
 
 
 st.title(title)
@@ -121,6 +124,8 @@ st.write("[避難所](%s)" % link)
 st.subheader(f"{date} {status}")
 
 st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
+
+st.write(f"{information}")
 
 
 lat, lng = 34.0663183, 132.997528
