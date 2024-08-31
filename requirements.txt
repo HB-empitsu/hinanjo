@@ -5,3 +5,4 @@ streamlit
 streamlit-folium
 requests
 beautifulsoup4
+html5lib
