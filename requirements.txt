@@ -1,6 +1,7 @@
 folium
 pandas
 pyproj
+plotly
 streamlit
 streamlit-folium
 requests
