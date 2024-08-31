@@ -70,24 +70,26 @@ def load_data():
 
     for tr in soup.select("table.listViewTable > tr")[2:-1]:
         tds = tr.select("td")
-        td = [i.get_text(strip=True) for i in tds]
 
-        text = tds[3].select_one("a").get("onclick")
-
-        pattern = r"lat=([0-9.]+)&lng=([0-9.]+)"
-
-        match = re.search(pattern, text)
-
-        if match:
-            lat = match.group(1)
-            lng = match.group(2)
-
-            td.append(lat)
-            td.append(lng)
-        else:
-            print("No match found")
-
-        data.append(td)
+        if len(tds) == 8:
+            td = [i.get_text(strip=True) for i in tds]
+    
+            text = tds[3].select_one("a").get("onclick")
+    
+            pattern = r"lat=([0-9.]+)&lng=([0-9.]+)"
+    
+            match = re.search(pattern, text)
+    
+            if match:
+                lat = match.group(1)
+                lng = match.group(2)
+    
+                td.append(lat)
+                td.append(lng)
+            else:
+                print("No match found")
+    
+            data.append(td)
 
     df = (
         pd.DataFrame(
@@ -129,89 +131,94 @@ st.write("[避難所 詳細情報](%s)" % link)
 st.subheader(f"{date} {status}")
 st.write(f"{information}")
 
-st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
+if df0.empty:
 
-lat, lng = 34.0663183, 132.997528
-
-# フォリウムマップの初期化
-m = folium.Map(
-    location=[lat, lng],
-    tiles="https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
-    attr='&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
-    zoom_start=14,
-)
-
-# データフレームからマーカーを追加
-for _, row in df0.iterrows():
-    color = set_color(row["避難人数"], row["収容人数"])
-
-    if row["開設状況"] != "開設":
-        color = "gray"
-
-    folium.Marker(
-        location=[row["緯度"], row["経度"]],
-        popup=folium.Popup(
-            f'<p>{row["避難所名"]}<br>{row["収容人数"]}/{row["避難人数"]}/{row["避難世帯数"]}</p><p><a href="{row["navi"]}" target="_blank">ここへ行く</p>',
-            max_width=300,
-        ),
-        tooltip=row["避難所名"],
-        icon=folium.Icon(color=color),
-    ).add_to(m)
-
-# 現在値
-folium.plugins.LocateControl().add_to(m)
-
-
-# マップをストリームリットに表示
-st_data = st_folium(m, width=500, height=300)
-
-# マップ境界内のデータフィルタリングと距離計算
-if st_data:
-    bounds = st_data["bounds"]
-    center = st_data.get("center", {"lat": lat, "lng": lng})
-
-    southWest_lat = bounds["_southWest"]["lat"]
-    southWest_lng = bounds["_southWest"]["lng"]
-    northEast_lat = bounds["_northEast"]["lat"]
-    northEast_lng = bounds["_northEast"]["lng"]
-
-    # 境界内のポイントをフィルタリング
-    filtered_df = df0.loc[
-        (df0["緯度"] >= southWest_lat)
-        & (df0["緯度"] <= northEast_lat)
-        & (df0["経度"] >= southWest_lng)
-        & (df0["経度"] <= northEast_lng)
-    ].copy()
-
-    # 距離計算
-    grs80 = Geod(ellps="GRS80")
-    filtered_df["distance"] = filtered_df.apply(
-        lambda row: grs80.inv(center["lng"], center["lat"], row["経度"], row["緯度"])[2], axis=1
+    st.write("避難人数：", df0["避難人数"].sum(), "人、", "避難世帯数：", df0["避難世帯数"].sum(), "世帯")
+    
+    lat, lng = 34.0663183, 132.997528
+    
+    # フォリウムマップの初期化
+    m = folium.Map(
+        location=[lat, lng],
+        tiles="https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
+        attr='&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
+        zoom_start=14,
     )
-
-    # 距離でソート
-    filtered_df.sort_values("distance", inplace=True)
-
-    # 結果を表示
-    df1 = (
-        filtered_df[
-            [
-                "避難所名",
-                "開設状況",
-                "収容人数",
-                "避難人数",
-                "避難世帯数",
-                "所在地",
-                "電話番号",
+    
+    # データフレームからマーカーを追加
+    for _, row in df0.iterrows():
+        color = set_color(row["避難人数"], row["収容人数"])
+    
+        if row["開設状況"] != "開設":
+            color = "gray"
+    
+        folium.Marker(
+            location=[row["緯度"], row["経度"]],
+            popup=folium.Popup(
+                f'<p>{row["避難所名"]}<br>{row["収容人数"]}/{row["避難人数"]}/{row["避難世帯数"]}</p><p><a href="{row["navi"]}" target="_blank">ここへ行く</p>',
+                max_width=300,
+            ),
+            tooltip=row["避難所名"],
+            icon=folium.Icon(color=color),
+        ).add_to(m)
+    
+    # 現在値
+    folium.plugins.LocateControl().add_to(m)
+    
+    
+    # マップをストリームリットに表示
+    st_data = st_folium(m, width=500, height=300)
+    
+    # マップ境界内のデータフィルタリングと距離計算
+    if st_data:
+        bounds = st_data["bounds"]
+        center = st_data.get("center", {"lat": lat, "lng": lng})
+    
+        southWest_lat = bounds["_southWest"]["lat"]
+        southWest_lng = bounds["_southWest"]["lng"]
+        northEast_lat = bounds["_northEast"]["lat"]
+        northEast_lng = bounds["_northEast"]["lng"]
+    
+        # 境界内のポイントをフィルタリング
+        filtered_df = df0.loc[
+            (df0["緯度"] >= southWest_lat)
+            & (df0["緯度"] <= northEast_lat)
+            & (df0["経度"] >= southWest_lng)
+            & (df0["経度"] <= northEast_lng)
+        ].copy()
+    
+        # 距離計算
+        grs80 = Geod(ellps="GRS80")
+        filtered_df["distance"] = filtered_df.apply(
+            lambda row: grs80.inv(center["lng"], center["lat"], row["経度"], row["緯度"])[2], axis=1
+        )
+    
+        # 距離でソート
+        filtered_df.sort_values("distance", inplace=True)
+    
+        # 結果を表示
+        df1 = (
+            filtered_df[
+                [
+                    "避難所名",
+                    "開設状況",
+                    "収容人数",
+                    "避難人数",
+                    "避難世帯数",
+                    "所在地",
+                    "電話番号",
+                ]
             ]
-        ]
-        .head(20)
-        .reset_index(drop=True)
-    )
-    st.dataframe(
-        df1,
-        column_config={
-            "distance": "直線距離",
-        },
-        hide_index=True,
-    )
+            .head(20)
+            .reset_index(drop=True)
+        )
+
+        st.dataframe(
+            df1,
+            column_config={
+                "distance": "直線距離",
+            },
+            hide_index=True,
+        )
+else:
+    st.write("データなし")
