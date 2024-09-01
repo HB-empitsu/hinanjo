@@ -87,17 +87,23 @@ df_info, df_data = load_data()
 df0 = df_data[df_data["避難 人数"] > 0].copy()
 
 pv = df0.pivot(index="日付", columns="避難所名", values="避難 人数").reindex(index=df_info.index).fillna(0).astype(int)
+df1 = pv.assign(合計=pv.sum(axis=1)).copy()
+
+df2 = pv.diff().fillna(pv).astype(int).copy()
+df2 = df2.assign(合計=df2.sum(axis=1))
 
 st.title("2024年8月28日　台風10号災害")
 
-tab1, tab2, tab3 = st.tabs(["利用避難所一覧", "避難所別利用状況", "避難者利用状況"])
+tab1, tab2, tab3, tab4 = st.tabs(["利用避難所一覧", "利用避難所差分", "避難所別利用状況", "避難者利用状況"])
 
 tab1.subheader("利用避難所一覧")
-tab1.table(pv)
+tab1.table(df1)
 
-tab2.subheader("避難所別利用状況")
+tab2.subheader("利用避難所差分")
+tab2.table(df2)
 
-p_max = df0["避難 人数"].max() + 5
+tab3.subheader("避難所別利用状況")
+
 rows = math.ceil(pv.shape[1] / 4)
 
 # サブプロットの作成
@@ -118,10 +124,19 @@ fig1.update_layout(height=800, showlegend=False)
 # Y軸の範囲を統一
 fig1.update_yaxes(range=[0, 15])
 
-# グラフの表示
-tab2.plotly_chart(fig1)
+fig1.update_xaxes(
+    showgrid=True,
+    # showticklabels=True,
+    gridwidth=1,
+    gridcolor="LightGray",
+    dtick=6 * 60 * 60 * 1000,  # 3時間
+)
 
-tab3.subheader("避難者利用状況")
+
+# グラフの表示
+tab3.plotly_chart(fig1)
+
+tab4.subheader("避難者利用状況")
 
 # 積み上げグラフの作成
 fig2 = go.Figure()
@@ -154,4 +169,11 @@ fig2.update_layout(
     height=800,
 )
 
-tab3.plotly_chart(fig2)
+fig2.update_xaxes(
+    showgrid=True,
+    gridwidth=1,
+    gridcolor="LightGray",
+    dtick=3 * 60 * 60 * 1000,  # 3時間
+)
+
+tab4.plotly_chart(fig2)
