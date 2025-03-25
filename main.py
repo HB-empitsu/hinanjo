@@ -114,7 +114,7 @@ st.set_page_config(
 )
 
 
-@st.cache_data(ttl="1d")
+@st.cache_data(ttl="600")
 def load_data():
     url = "https://city-imabari.my.salesforce-sites.com/K_PUB_VF_HinanjyoList"
 
@@ -159,7 +159,7 @@ if not df0.empty:
         location=[lat, lng],
         tiles="https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png",
         attr='&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
-        zoom_start=14,
+        zoom_start=10,
     )
 
     df0["navi"] = df0.apply(
